@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment Variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Database
+chroma_db/
+
+# Temporary Files
+temp_*
+
+# OS Specific
+.DS_Store

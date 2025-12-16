@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+langchain
+langchain-google-genai
+langchain-huggingface
+chromadb
+python-dotenv
+python-multipart
+sentence-transformers
+pypdf
+langchain-community
+langchain-chroma
+importlib-metadata
+prometheus-fastapi-instrumentator
