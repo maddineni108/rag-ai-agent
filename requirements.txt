@@ -12,3 +12,4 @@ langchain-community
 langchain-chroma
 importlib-metadata
 prometheus-fastapi-instrumentator
+google-generativeai
