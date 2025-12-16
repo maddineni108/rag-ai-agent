@@ -1,0 +1,28 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.pytest_cache/
+
+# Environment variables (SECURITY CRITICAL: Do not include in image)
+.env
+
+# ChromaDB persistence directory (should be mounted as a volume if persistence is needed across restarts, or let it rebuild)
+chroma_db/
+# If you want to bake the DB into the image, remove the line above. 
+# Usually for RAG, you might want to mount it or use an external DB. 
+# For this simple setup, we exclude it to keep image small and let it regenerate or be mounted.
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
