@@ -8,10 +8,29 @@ from rag_engine import rag_engine
 from logger_config import setup_logger
 from models import ChatRequest, ChatResponse, DocumentInfo
 from prometheus_fastapi_instrumentator import Instrumentator
+from prometheus_client import Counter, Histogram
+import time
 
 logger = setup_logger(__name__)
 
 app = FastAPI(title="RAG AI Agent API")
+
+# Custom Metrics
+CHAT_REQUESTS = Counter(
+    "rag_chat_requests_total", 
+    "Total number of chat requests", 
+    ["provider", "status"]
+)
+DOCUMENTS_UPLOADED = Counter(
+    "rag_documents_uploaded_total", 
+    "Total number of documents uploaded",
+    ["file_type"]
+)
+CHAT_LATENCY = Histogram(
+    "rag_chat_generation_seconds",
+    "Time taken to generate chat response",
+    ["provider"]
+)
 
 # Setup Prometheus Instrumentation
 Instrumentator().instrument(app).expose(app)
@@ -23,14 +42,22 @@ def read_root():
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     logger.info(f"Received chat request for model: {request.model_provider} / {request.model_name}")
+    start_time = time.time()
     try:
         response = rag_engine.chat(
             prompt=request.query, 
             model_provider=request.model_provider, 
             model_name=request.model_name
         )
+        
+        # Record successful request
+        CHAT_REQUESTS.labels(provider=request.model_provider, status="success").inc()
+        CHAT_LATENCY.labels(provider=request.model_provider).observe(time.time() - start_time)
+        
         return ChatResponse(response=response)
     except Exception as e:
+        # Record failed request
+        CHAT_REQUESTS.labels(provider=request.model_provider, status="error").inc()
         logger.error(f"Chat endpoint error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -46,9 +73,11 @@ async def upload_document(file: UploadFile = File(...)):
         if file.filename.endswith(".pdf"):
             loader = PyPDFLoader(temp_file_path)
             documents = loader.load()
+            DOCUMENTS_UPLOADED.labels(file_type="pdf").inc()
         elif file.filename.endswith(".txt"):
             loader = TextLoader(temp_file_path)
             documents = loader.load()
+            DOCUMENTS_UPLOADED.labels(file_type="txt").inc()
         else:
              raise HTTPException(status_code=400, detail="Unsupported file format. Only PDF and TXT supported.")
         
