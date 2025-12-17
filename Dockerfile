@@ -11,6 +11,12 @@ COPY requirements.txt .
 # --no-cache-dir is used to keep the image size small
 RUN pip install --no-cache-dir -r requirements.txt
 
+# After pip install
+RUN python - <<EOF
+from sentence_transformers import SentenceTransformer
+SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+EOF
+
 # Copy the current directory contents into the container at /app
 COPY . .
 

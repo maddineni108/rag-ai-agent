@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rag-ai-agent
+  labels:
+    app: rag-ai-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rag-ai-agent
+  template:
+    metadata:
+      labels:
+        app: rag-ai-agent
+    spec:
+      containers:
+      - name: rag-ai-agent
+        image: rag-ai-agent:latest
+        imagePullPolicy: Never  # Use local image in Docker Desktop
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: rag-secrets
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
